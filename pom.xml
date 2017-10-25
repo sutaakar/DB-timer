@@ -31,6 +31,10 @@
     <db.driver.class>org.postgresql.xa.PGXADataSource</db.driver.class>
 
     <kie.server.testing.server.local.repo.dir>${project.build.directory}/repo</kie.server.testing.server.local.repo.dir>
+
+    <server-with-controller.skip>false</server-with-controller.skip>
+    <separate-server-1.skip>false</separate-server-1.skip>
+    <separate-server-2.skip>false</separate-server-2.skip>
   </properties>
 
   <dependencies>
@@ -156,6 +160,7 @@
               <goal>start</goal>
             </goals>
             <configuration>
+              <skip>${server-with-controller.skip}</skip>
               <container>
                 <contextKey>server-with-controller</contextKey>
                 <zipUrlInstaller>
@@ -205,6 +210,7 @@
               <goal>start</goal>
             </goals>
             <configuration>
+              <skip>${separate-server-1.skip}</skip>
               <container>
                 <contextKey>separate-server-1</contextKey>
                 <zipUrlInstaller>
@@ -243,6 +249,7 @@
               <goal>start</goal>
             </goals>
             <configuration>
+              <skip>${separate-server-2.skip}</skip>
               <container>
                 <contextKey>separate-server-2</contextKey>
                 <zipUrlInstaller>

@@ -15,16 +15,27 @@
 
 package com.reproducer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kie.server.api.model.KieContainerStatus;
 import org.kie.server.api.model.ReleaseId;
+import org.kie.server.client.KieServicesClient;
+import org.kie.server.client.KieServicesConfiguration;
+import org.kie.server.client.KieServicesFactory;
+import org.kie.server.client.ProcessServicesClient;
 import org.kie.server.integrationtests.controller.client.KieServerMgmtControllerClient;
 import org.kie.server.integrationtests.shared.KieServerDeployer;
 
 public class TimerIT {
 
-    private static ReleaseId releaseId = new ReleaseId("org.kie.server.testing", "timer-project",
+    private static ReleaseId releaseIdTimerProject = new ReleaseId("org.kie.server.testing", "timer-project",
+            "1.0.0.Final");
+    private static ReleaseId releaseIdTimerProcess = new ReleaseId("org.kie.server.testing", "intermediate-timer-process",
             "1.0.0.Final");
 
     private static final String CONTAINER_ID = "timer-project";
@@ -34,15 +45,53 @@ public class TimerIT {
     @BeforeClass
     public static void buildAndDeployArtifacts() {
         KieServerDeployer.buildAndDeployMavenProject(ClassLoader.class.getResource("/kjars-sources/timer-project").getFile());
+        KieServerDeployer.buildAndDeployMavenProject(ClassLoader.class.getResource("/kjars-sources/intermediate-timer-process").getFile());
 
         kieServerMgmtControllerClient = new KieServerMgmtControllerClient("http://localhost:8080/standalone-controller/rest/controller",
                 "controllerUser", "controllerUser1@");
     }
 
-    @Test
-    public void testTimerStartEvent() throws InterruptedException {
-        kieServerMgmtControllerClient.saveContainerSpec("test-kie-server", "test-kie-server", CONTAINER_ID, CONTAINER_ID, releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion(), KieContainerStatus.STARTED);
+//    @Test
+//    public void testTimerStartEvent() throws InterruptedException {
+//        kieServerMgmtControllerClient.saveContainerSpec("test-kie-server", "test-kie-server", CONTAINER_ID, CONTAINER_ID, releaseIdTimerProject.getGroupId(), releaseIdTimerProject.getArtifactId(), releaseIdTimerProject.getVersion(), KieContainerStatus.STARTED);
+//
+//        Thread.sleep(15_000L);
+//    }
 
-        Thread.sleep(15_000L);
+    @Test
+    public void testTimerIntermediateEvent() throws InterruptedException {
+        kieServerMgmtControllerClient.saveContainerSpec("test-kie-server", "test-kie-server", CONTAINER_ID, CONTAINER_ID, releaseIdTimerProcess.getGroupId(), releaseIdTimerProcess.getArtifactId(), releaseIdTimerProcess.getVersion(), KieContainerStatus.STARTED);
+
+        // Wait until project is deployed
+        Thread.sleep(5_000L);
+
+        List<Thread> workers = new ArrayList<Thread>(); 
+
+        for (int i=0; i<3; i++) {
+            Thread worker = new Thread(new Worker());
+            worker.start();
+            workers.add(worker);
+        }
+
+        for (Thread worker : workers) {
+            worker.join();
+        }
+
+        Thread.sleep(5_000L);
+    }
+
+    private class Worker implements Runnable {
+
+        @Override
+        public void run() {
+            KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration("http://localhost:8080/kie-server/services/rest/server",
+                    "yoda", "usetheforce123@", 15_000L);
+            KieServicesClient kieServerClient = KieServicesFactory.newKieServicesClient(configuration);
+            ProcessServicesClient processClient = kieServerClient.getServicesClient(ProcessServicesClient.class);
+
+            Map<String, Object> variables = new HashMap<String, Object>();
+            variables.put("timer", "5s");
+            processClient.startProcess(CONTAINER_ID, "definition-project.timer-process", variables);
+        }
     }
 }
