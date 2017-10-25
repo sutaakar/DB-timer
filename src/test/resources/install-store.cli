@@ -1,0 +1,3 @@
+/subsystem=ejb3/service=timer-service/database-data-store=my-clustered-store:add(allow-execution=true, datasource-jndi-name="java:/jdbc/jbpm", refresh-interval=700, database="postgresql", partition="mypartition")
+
+/subsystem=ejb3/service=timer-service:write-attribute(name=default-data-store,value=my-clustered-store)
