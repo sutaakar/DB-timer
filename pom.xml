@@ -27,7 +27,7 @@
     <db.url>jdbc:postgresql://hostname:port/DBname</db.url>
     <db.username>username</db.username>
     <!-- Workaround to inject transaction isolation to Cargo -->
-    <db.password>password --transaction-isolation=TRANSACTION_SERIALIZABLE</db.password>
+    <db.password>password --transaction-isolation=TRANSACTION_READ_COMMITTED</db.password>
     <db.driver.class>org.postgresql.xa.PGXADataSource</db.driver.class>
 
     <kie.server.testing.server.local.repo.dir>${project.build.directory}/repo</kie.server.testing.server.local.repo.dir>
