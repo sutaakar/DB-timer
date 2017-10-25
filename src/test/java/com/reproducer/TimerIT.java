@@ -67,7 +67,7 @@ public class TimerIT {
 
         List<Thread> workers = new ArrayList<Thread>(); 
 
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<8; i++) {
             Thread worker = new Thread(new Worker());
             worker.start();
             workers.add(worker);
@@ -77,7 +77,7 @@ public class TimerIT {
             worker.join();
         }
 
-        Thread.sleep(5_000L);
+        Thread.sleep(30_000L);
     }
 
     private class Worker implements Runnable {
@@ -85,12 +85,12 @@ public class TimerIT {
         @Override
         public void run() {
             KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration("http://localhost:8080/kie-server/services/rest/server",
-                    "yoda", "usetheforce123@", 15_000L);
+                    "yoda", "usetheforce123@", 30_000L);
             KieServicesClient kieServerClient = KieServicesFactory.newKieServicesClient(configuration);
             ProcessServicesClient processClient = kieServerClient.getServicesClient(ProcessServicesClient.class);
 
             Map<String, Object> variables = new HashMap<String, Object>();
-            variables.put("timer", "5s");
+            variables.put("timer", "15s");
             processClient.startProcess(CONTAINER_ID, "definition-project.timer-process", variables);
         }
     }
