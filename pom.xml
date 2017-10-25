@@ -139,8 +139,19 @@
             </users>
             <datasources>
               <datasource>
-                <id>external-db</id>
+                <id>external-db-kie-server</id>
                 <jndiName>${org.kie.server.persistence.ds}</jndiName>
+                <username>${db.username}</username>
+                <password>${db.password}</password>
+                <driverClass>${db.driver.class}</driverClass>
+                <connectionType>javax.sql.XADataSource</connectionType>
+                <connectionProperties>
+                  <url>${db.url}</url>
+                </connectionProperties>
+              </datasource>
+              <datasource>
+                <id>external-db-timer</id>
+                <jndiName>java:/jboss/datasources/psTimer</jndiName>
                 <username>${db.username}</username>
                 <password>${db.password}</password>
                 <driverClass>${db.driver.class}</driverClass>
